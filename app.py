@@ -647,8 +647,7 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         alpha   = "FF" if broken else "88"
         line_w  = 1.8 if broken else 1.0
         tick    = " ✅" if broken else ""
-                # --- START OF COPY ---
-        # Safe plotting for horizontal breakout lines
+                # Safe plotting for horizontal breakout lines
         for level in levels:
             # Check if the level is actually a number before plotting
             if level is not None and str(level).lower() != 'nan':
@@ -664,6 +663,8 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
                     # Skip if the math fails for a specific level
                     continue
         
+        # This return must be aligned with the 'for' loop above (8 spaces)
+        return fig
         # This line must be aligned with the word 'for' above
         return fig
         # --- END OF COPY ---
