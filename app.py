@@ -647,83 +647,20 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         alpha   = "FF" if broken else "88"
         line_w  = 1.8 if broken else 1.0
         tick    = " ✅" if broken else ""
-        
-        # --- THIS MUST BE PUSHED TO THE RIGHT ---
-        for level in levels:
-            # Pushed even further to the right (inside the loop)
-            if level is not None and str(level) != 'nan':
-                fig.add_hline(
-                    y=float(level), 
-                    line_dash="dot", 
-                    line_color="orange", 
-                    annotation_text="Breakout",
-                    annotation_position="bottom right"
-                )
-        
-        # Ensure 'return fig' is also aligned with the 'for' loop above it
-        return fig
-    # ── 5. Volume bars ────────────────────────────────────────
-    vol_colors = [
-        "#00BFA5" if c >= o else "#F44336"
-        for c, o in zip(display["Close"], display["Open"])
-    ]
-    fig.add_trace(go.Bar(
-        x=display.index, y=display["Volume"],
-        name="Volume", marker_color=vol_colors, opacity=0.65,
-    ), row=2, col=1)
-
-    if "Volume_MA_20" in display.columns:
-        fig.add_trace(go.Scatter(
-            x=display.index, y=display["Volume_MA_20"],
-            mode="lines", name="Vol MA20",
-            line=dict(color="#FFD600", width=1.3),
-        ), row=2, col=1)
-
-    # ── 6. RSI pane ───────────────────────────────────────────
-    if "RSI_14" in display.columns:
-        fig.add_trace(go.Scatter(
-            x=display.index, y=display["RSI_14"],
-            mode="lines", name="RSI(14)",
-            line=dict(color="#40C4FF", width=1.8),
-        ), row=3, col=1)
-        # OB/OS shaded bands
-        fig.add_hrect(y0=70, y1=100, row=3, col=1,
-                      fillcolor="rgba(244,67,54,0.10)", line_width=0)
-        fig.add_hrect(y0=0,  y1=30,  row=3, col=1,
-                      fillcolor="rgba(0,191,165,0.10)", line_width=0)
-        for lvl, col in [(70, "#F44336"), (30, "#00BFA5"), (50, "#455A64")]:
-            fig.add_hline(y=lvl, row=3, col=1,
-                          line=dict(color=col, width=0.8, dash="dot"))
-
-    # ── Layout ────────────────────────────────────────────────
-    fig.update_layout(
-        template="plotly_dark",
-        paper_bgcolor=_DARK_BG,
-        plot_bgcolor=_PANEL_BG,
-        title=dict(
-            text=f"<b style='font-family:Space Mono'>{name}</b>"
-                 f"<span style='color:#546E7A; font-size:12px; font-family:Space Mono'>  {ticker}</span>",
-            font=dict(size=15, color="#CFD8DC"),
-        ),
-        height=680,
-        margin=dict(l=0, r=90, t=44, b=0),
-        legend=dict(
-            bgcolor="rgba(8,14,20,0.85)", bordercolor="#1C2B38", borderwidth=1,
-            font=dict(size=10, family="Space Mono", color="#90A4AE"),
-            orientation="h", y=1.03, x=0,
-        ),
-        xaxis_rangeslider_visible=False,
-    )
-
-    axis_style = dict(showgrid=True, gridcolor=_GRID, gridwidth=0.5,
-                      zeroline=False, tickfont=dict(family="Space Mono", size=9, color="#546E7A"))
-    fig.update_xaxes(**axis_style)
-    fig.update_yaxes(**axis_style)
-    fig.update_yaxes(title_text="Price",  row=1, col=1, title_font=dict(size=9, color="#546E7A"))
-    fig.update_yaxes(title_text="Volume", row=2, col=1, title_font=dict(size=9, color="#546E7A"))
-    fig.update_yaxes(title_text="RSI",    row=3, col=1, range=[0, 100],
-                     title_font=dict(size=9, color="#546E7A"))
-
+      # Safe plotting for horizontal breakout lines
+for level in levels:
+    # Check if the level is actually a number before plotting
+    if level is not None and str(level).lower() != 'nan':
+        try:
+            fig.add_hline(
+                y=float(level), 
+                line_dash="dot", 
+                line_color="orange", 
+                annotation_text="Breakout",
+                annotation_position="bottom right"
+            )
+        except (ValueError, TypeError):
+            continue
     return fig
 
 
