@@ -646,22 +646,44 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         broken  = info["breakout"]
         alpha   = "FF" if broken else "88"
         import streamlit.components.v1 as components
+        # --- REPLACE FROM LINE 648 TO 664 ---
+        # Map your ticker to a format TradingView understands
+        tv_symbol = ticker.replace(".NS", "").replace(".BO", "")
+        if "NIFTY" in tv_symbol:
+            tv_symbol = "NSE:NIFTY"
+        else:
+            tv_symbol = f"NSE:{tv_symbol}"
 
-def build_chart(df, ticker, name, levels):
-    # Map your ticker to a format TradingView understands (e.g., RELIANCE.NS -> NSE:RELIANCE)
-    tv_symbol = ticker.replace(".NS", "").replace(".BO", "")
-    if "NIFTY" in tv_symbol:
-        tv_symbol = "NSE:NIFTY"
-    else:
-        tv_symbol = f"NSE:{tv_symbol}"
+        # TradingView Widget HTML
+        import streamlit.components.v1 as components
+        tradingview_html = f"""
+            <div style="height:500px;width:100%;">
+              <div id="tradingview_chart" style="height:100%;width:100%;"></div>
+              <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+              <script type="text/javascript">
+              new TradingView.widget({{
+                "autosize": true,
+                "symbol": "{tv_symbol}",
+                "interval": "D",
+                "timezone": "Asia/Kolkata",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "enable_publishing": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_chart"
+              }});
+              </script>
+            </div>
+        """
+        
+        # Render the widget
+        components.html(tradingview_html, height=500)
+        
+        # This line MUST have 8 spaces before it
+        import plotly.graph_objects as go
+        return go.Figure()
 
-    # TradingView Widget HTML
-    tradingview_html = f"""
-        <div class="tradingview-widget-container" style="height:500px;width:100%;">
-          <div id="tradingview_chart"></div>
-          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-          <script type="text/javascript">
-          new TradingView.widget({{
             "autosize": true,
             "symbol": "{tv_symbol}",
             "interval": "D",
