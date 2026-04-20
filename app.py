@@ -662,7 +662,6 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
                 except (ValueError, TypeError):
                     # Skip if the math fails for a specific level
                     continue
-        
         # This return must be aligned with the 'for' loop above (8 spaces)
         return fig
         # This line must be aligned with the word 'for' above
