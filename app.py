@@ -647,80 +647,24 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         alpha   = "FF" if broken else "88"
         line_w  = 1.8 if broken else 1.0
         tick    = " ✅" if broken else ""
-      # Safe plotting for horizontal breakout lines
-for level in levels:
-    # Check if the level is actually a number before plotting
-    if level is not None and str(level).lower() != 'nan':
-        try:
-            fig.add_hline(
-                y=float(level), 
-                line_dash="dot", 
-                line_color="orange", 
-                annotation_text="Breakout",
-                annotation_position="bottom right"
-            )
-        except (ValueError, TypeError):
-            continue
-    return fig
-
-
-# ============================================================
-# SECTION 8 — WATCHLIST SCANNER (batch)
-# ============================================================
-
-@st.cache_data(ttl=600, show_spinner=False)   # 10-minute cache
-def run_full_scan(asset_category: str) -> pd.DataFrame:
-    """
-    Batch-scan every asset in a category.
-
-    Ranking logic
-    ─────────────
-    1. Volume_Ratio (descending)  — highest volume surge first
-    2. Dist to Level % (ascending) — closest to unbroken breakout level first
-
-    Returns a styled-ready DataFrame with all key metrics.
-    """
-    assets = {k: v for k, v in ASSET_UNIVERSE.get(asset_category, {}).items()
-              if v is not None}
-
-    rows   = []
-    prog   = st.progress(0, text="Initializing scanner…")
-    status = st.empty()
-    total  = len(assets)
-
-    for idx, (name, ticker) in enumerate(assets.items()):
-        status.markdown(
-            f"<span style='font-family:Space Mono;font-size:0.8rem;color:#00E5FF'>"
-            f"🔍 Scanning {name} ({idx+1}/{total})…</span>",
-            unsafe_allow_html=True,
-        )
-        prog.progress((idx + 1) / total)
-
-        try:
-            df = fetch_ohlcv(ticker, period="5y", interval="1d")
-            if df.empty or len(df) < 21:
-                continue
-
-            df     = add_indicators(df)
-            levels = calc_breakout_levels(df)
-            swing  = get_swing_signal(df, levels)
-            badges = get_breakout_badges(levels)
-
-            close     = df["Close"].iloc[-1]
-            prev      = df["Close"].iloc[-2] if len(df) > 1 else close
-            chg_pct   = ((close - prev) / prev) * 100
-            rsi_val   = df["RSI_14"].iloc[-1]       if "RSI_14"       in df.columns else np.nan
-            ema20_val = df["EMA_20"].iloc[-1]        if "EMA_20"       in df.columns else np.nan
-            vol_ratio = df["Volume_Ratio"].iloc[-1]  if "Volume_Ratio" in df.columns else np.nan
-
-            # Distance to nearest UNBROKEN breakout level
-            dist_list = [
-                info["distance_pct"]
-                for tf, info in levels.items()
-                if not info.get("breakout")
-            ]
-            nearest_dist = min(dist_list, key=abs) if dist_list else 0.0
-
+        # Safe plotting for horizontal breakout lines
+        for level in levels:
+            # Check if the level is actually a number before plotting
+            if level is not None and str(level).lower() != 'nan':
+                try:
+                    fig.add_hline(
+                        y=float(level), 
+                        line_dash="dot", 
+                        line_color="orange", 
+                        annotation_text="Breakout",
+                        annotation_position="bottom right"
+                    )
+                except (ValueError, TypeError):
+                    # Skip if the math fails for a specific level
+                    continue
+        
+        # This return must be aligned with the 'for' loop above
+        return fig
             rows.append({
                 "Asset":          name,
                 "Ticker":         ticker,
