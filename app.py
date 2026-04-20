@@ -645,23 +645,46 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         lvl     = info["level"]
         broken  = info["breakout"]
         alpha   = "FF" if broken else "88"
-        line_w  = 1.8 if broken else 1.0
-        tick    = " ✅" if broken else ""
-                # Safe plotting for horizontal breakout lines
-        for level in levels:
-            # Check if the level is actually a number before plotting
-            if level is not None and str(level).lower() != 'nan':
-                try:
-                    fig.add_hline(
-                        y=float(level), 
-                        line_dash="dot", 
-                        line_color="orange", 
-                        annotation_text="Breakout",
-                        annotation_position="bottom right"
-                    )
-                except (ValueError, TypeError):
-                    # Skip if the math fails for a specific level
-                    continue
+        import streamlit.components.v1 as components
+
+def build_chart(df, ticker, name, levels):
+    # Map your ticker to a format TradingView understands (e.g., RELIANCE.NS -> NSE:RELIANCE)
+    tv_symbol = ticker.replace(".NS", "").replace(".BO", "")
+    if "NIFTY" in tv_symbol:
+        tv_symbol = "NSE:NIFTY"
+    else:
+        tv_symbol = f"NSE:{tv_symbol}"
+
+    # TradingView Widget HTML
+    tradingview_html = f"""
+        <div class="tradingview-widget-container" style="height:500px;width:100%;">
+          <div id="tradingview_chart"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+          <script type="text/javascript">
+          new TradingView.widget({{
+            "autosize": true,
+            "symbol": "{tv_symbol}",
+            "interval": "D",
+            "timezone": "Asia/Kolkata",
+            "theme": "dark",
+            "style": "1",
+            "locale": "en",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "container_id": "tradingview_chart"
+          }});
+          </script>
+        </div>
+    """
+    
+    # Render the widget in Streamlit
+    components.html(tradingview_html, height=500)
+    
+    # Return a dummy figure so the rest of your app doesn't crash
+    return None
+
         # This return must be aligned with the 'for' loop above (8 spaces)
         return fig
         # This line must be aligned with the word 'for' above
