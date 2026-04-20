@@ -647,12 +647,16 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         alpha   = "FF" if broken else "88"
         line_w  = 1.8 if broken else 1.0
         tick    = " ✅" if broken else ""
+        # --- NEW CODE (Corrected Version) ---
+for level in levels:
+    # Only draw the line if the level is a valid number and not empty
+    if level is not None and str(level) != 'nan':
         fig.add_hline(
-            y=lvl, row=1, col=1,
-            line=dict(color=color + alpha, width=line_w, dash=dash),
-            annotation_text=f"  {lbl}: {lvl:,.2f}{tick}",
-            annotation_position="right",
-            annotation_font=dict(color=color + alpha, size=10, family="Space Mono"),
+            y=float(level), 
+            line_dash="dot", 
+            line_color="orange", 
+            annotation_text="Breakout",
+            annotation_position="bottom right"
         )
 
     # ── 5. Volume bars ────────────────────────────────────────
