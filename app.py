@@ -674,6 +674,25 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
               </script>
             </div>
         """
+        # Render the TradingView widget
+        components.html(tradingview_html, height=500)
+        
+        # This line MUST have 8 spaces before it to be inside the function
+        import plotly.graph_objects as go
+        return go.Figure()
+
+                "interval": "D",
+                "timezone": "Asia/Kolkata",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "enable_publishing": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_chart"
+              }});
+              </script>
+            </div>
+        """
         
         # Render the TradingView widget
         components.html(tradingview_html, height=500)
