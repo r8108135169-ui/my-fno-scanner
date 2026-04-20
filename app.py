@@ -645,9 +645,7 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
         lvl     = info["level"]
         broken  = info["breakout"]
         alpha   = "FF" if broken else "88"
-        import streamlit.components.v1 as components
-        # --- REPLACE FROM LINE 648 TO 664 ---
-        # Map your ticker to a format TradingView understands
+        # Map your ticker to TradingView format
         tv_symbol = ticker.replace(".NS", "").replace(".BO", "")
         if "NIFTY" in tv_symbol:
             tv_symbol = "NSE:NIFTY"
@@ -662,6 +660,28 @@ def build_chart(df: pd.DataFrame, ticker: str, name: str, levels: dict) -> go.Fi
               <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
               <script type="text/javascript">
               new TradingView.widget({{
+                "autosize": true,
+                "symbol": "{tv_symbol}",
+                "interval": "D",
+                "timezone": "Asia/Kolkata",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "enable_publishing": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_chart"
+              }});
+              </script>
+            </div>
+        """
+        
+        # Render the TradingView widget
+        components.html(tradingview_html, height=500)
+        
+        # We must return a figure to avoid breaking other parts of the app
+        import plotly.graph_objects as go
+        return go.Figure()
+
                 "autosize": true,
                 "symbol": "{tv_symbol}",
                 "interval": "D",
